@@ -10,8 +10,15 @@
 // last_node : return address of last node and also check if content is in one of the nodes.
 
 
+size_t  ft_strlen(const char *s)
+{
+    size_t i;
 
-
+    i = 0;
+    while(s[i])
+        i++;
+    return(i);
+}
 void	*free_strings(char **s)
 {
 	int	i;
@@ -138,7 +145,39 @@ char	**ft_split(char const *s, char c)
 	}
 	return (p);
 }
-/*------------------------------*/
+/*--------------------------------------------------*/
+void    set_level(t_list *stack)
+{
+    
+}
+int check_sorted(t_list *stack)
+{
+    int nb;
+
+    nb = stack->number;
+    while(stack->next)
+    {
+        stack = stack->next;
+        if(nb > stack->number)
+        {
+            return(0);
+        }
+        nb = stack->number;
+    }
+    return(1);
+}
+int stack_size(t_list *stack)
+{
+    int size;
+    
+    size = 0;
+    while(stack)
+    {
+        stack = stack->next;
+        size++;
+    }
+    return(size);
+}
 void error(char **buffer, t_list **stack)
 {
     t_list *tmp;
@@ -158,7 +197,7 @@ void error(char **buffer, t_list **stack)
             tmp = p;
         }
     }
-    write(2,"error\n",6);
+    write(2,"Error\n",6);
     exit(1);
 }
 long    ft_atol(char *str)
@@ -187,8 +226,12 @@ long    ft_atol(char *str)
 int check_input(char *buffer, long *nb)
 {
     int i;
+    size_t lent;
 
     i = 0;
+    lent = ft_strlen(buffer);
+    if(lent > 11)
+        return(0);
     if((buffer[i] == '-' || buffer[i] == '+') && buffer[i + 1])
         i++;
     while(buffer[i] && (buffer[i] >= '0' && buffer[i] <= '9'))
@@ -271,16 +314,82 @@ void free_stack(t_list **stack)
     }
     *stack = NULL;
 }
+t_list * max(t_list *list)
+{
+    int nb;
+    t_list *save;
+
+    nb = list->number;
+    save = list;
+    while(list->next)
+    {
+        list = list->next;
+        if(nb < list->number)
+        {
+            nb = list->number;
+            save = list;
+        }
+    }
+    return(save);
+}
+
+void sort_3(t_list **stack)
+{
+    t_list *max_nb;
+
+    max_nb = max(*stack);
+    
+    if(max_nb == *stack)
+        ra(stack);
+    else if(max_nb == (*stack)->next)
+        rra(stack);
+    if((*stack)->number > (*stack)->next->number)
+        sa(stack);
+}
+void rocket_sort(t_list **a)
+{
+    t_list *b;
+
+    b = NULL;
+    //a --> b
+    while (stack_size(*a) > 3)
+        push_to_b(a);
+    //sort_3
+
+    //b --> a
+    //min at the head
+}
+void sort_stack(t_list **stack)
+{
+    int size;
+ 
+    size = stack_size(*stack);
+    if(size == 2)
+        sa(stack);
+    else if(size == 3)
+        sort_3(stack);
+    else
+        rocket_sort(stack);
+    
+}
+
+
+
+
+
+
+
 int main(int ac, char *av[])
 {
     t_list *head;
-
+ 
     head = NULL;
     if(ac == 1)
         error(NULL,NULL);
     stack_check(av+1, &head);
-    for (t_list *i = head; i; i = i->next)// i != NULL
+    if(check_sorted(head) == 0)
+        sort_stack(&head);
+    for (t_list *i = head; i; i = i->next)
         printf("%d\n", i->number);
     free_stack(&head);
-    sorted(&head);
 }
