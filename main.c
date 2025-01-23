@@ -146,10 +146,7 @@ char	**ft_split(char const *s, char c)
 	return (p);
 }
 /*--------------------------------------------------*/
-void    set_level(t_list *stack)
-{
-    
-}
+
 int check_sorted(t_list *stack)
 {
     int nb;
@@ -278,7 +275,7 @@ void addt_stack(int nb, t_list **stack, int * flag)
     else
         *stack = create_node(nb);
 }
-void stack_check(char **av, t_list **stack)
+void stack_check(char **av, t_list **stack, int *n)
 {
     int i,x,flag ;
     char **buffer;
@@ -373,7 +370,23 @@ void sort_stack(t_list **stack)
     
 }
 
+void init_arr(int *n, t_list *stack)
+{
+    int size;
+    int i;
 
+    size = stack_size(stack);
+    n = (int *)malloc((size + 1) * sizeof(int));
+    i = 0;
+
+    while(stack)
+    {
+        n[i] = stack->number;
+        stack = stack->next;
+        i++;
+    }
+    quick_sort(n,0,size-1);
+}
 
 
 
@@ -382,11 +395,14 @@ void sort_stack(t_list **stack)
 int main(int ac, char *av[])
 {
     t_list *head;
+    int *n;
  
     head = NULL;
+    n = NULL;
     if(ac == 1)
         error(NULL,NULL);
-    stack_check(av+1, &head);
+    stack_check(av+1, &head, n);
+    init_arr(n,head);
     if(check_sorted(head) == 0)
         sort_stack(&head);
     for (t_list *i = head; i; i = i->next)
