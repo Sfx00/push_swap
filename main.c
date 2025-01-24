@@ -146,6 +146,52 @@ char	**ft_split(char const *s, char c)
 	return (p);
 }
 /*--------------------------------------------------*/
+void    set_indice(t_list *stack)
+{
+    int i;
+
+    i = 0;
+    while(stack)
+    {
+        stack->indice = i;
+        i++;
+        stack = stack->next;
+    }
+}
+void set_target(t_list *a, t_list *b)
+{
+    t_list *p;
+    int flag;
+
+    while(b)
+    {
+        b->target = a->number;
+        p = a;
+        flag = 0;
+
+        while(p)
+        {
+            if(p->number > b->number && p->number <= b->target)
+            {
+                flag = 1;
+                b->target = p->number;
+            }
+            p = p->next;
+        }
+        if(flag == 0)
+        {
+            init_arr(a,NULL);
+            p = a;
+            while(p)
+            {
+                if(p->level == 0)
+                    b->target = p->number;
+                p = p->next;
+            }
+        }
+       b = b->next;
+    }
+}   
 
 int check_sorted(t_list *stack)
 {
@@ -275,7 +321,7 @@ void addt_stack(int nb, t_list **stack, int * flag)
     else
         *stack = create_node(nb);
 }
-void stack_check(char **av, t_list **stack, int *n)
+void stack_check(char **av, t_list **stack)
 {
     int i,x,flag ;
     char **buffer;
@@ -329,7 +375,6 @@ t_list * max(t_list *list)
     }
     return(save);
 }
-
 void sort_3(t_list **stack)
 {
     t_list *max_nb;
@@ -343,38 +388,74 @@ void sort_3(t_list **stack)
     if((*stack)->number > (*stack)->next->number)
         sa(stack);
 }
+void    push_to_b(t_list **a, t_list **b)
+{
+    int pivo;
+    t_list *p;
+
+    while(stack_size(*a) > 3)
+    {
+        pivo = stack_size(*a) / 3;
+        if((*a)->level <= pivo)
+        {
+            pb(a,b);
+            init_arr(*a,NULL);
+        }
+        else
+            ra(a);
+    }
+}
+void push_to_a(t_list **a, t_list **b)
+{
+    
+    while(b)
+    {
+        set_indice(*a);
+        set_indice(*b);
+        set_target(*a,*b);
+    }
+    
+
+}
 void rocket_sort(t_list **a)
 {
     t_list *b;
 
     b = NULL;
     //a --> b
-    while (stack_size(*a) > 3)
-        push_to_b(a);
-    //sort_3
-
+    push_to_b(a,&b);
+    if(stack_size(*a) == 3)
+        sort_3(a);
     //b --> a
+    push_to_a(a,&b);
+    for (t_list *i = b; i; i = i->next)
+        printf("%d : %d  :%d   :%d \n", i->number, i->level, i->indice, i->target);
     //min at the head
 }
-void sort_stack(t_list **stack)
+
+
+
+void sort_stack(t_list **a)
 {
     int size;
  
-    size = stack_size(*stack);
+    size = stack_size(*a);
     if(size == 2)
-        sa(stack);
+        sa(a);
     else if(size == 3)
-        sort_3(stack);
+        sort_3(a);
     else
-        rocket_sort(stack);
+        rocket_sort(a);
     
 }
 
-void init_arr(int *n, t_list *stack)
+void init_arr(t_list *stack, int *n)
 {
     int size;
     int i;
+    t_list *p;
 
+    p = stack;
     size = stack_size(stack);
     n = (int *)malloc((size + 1) * sizeof(int));
     i = 0;
@@ -386,10 +467,9 @@ void init_arr(int *n, t_list *stack)
         i++;
     }
     quick_sort(n,0,size-1);
+    set_level(n,p);
+    free(n);
 }
-
-
-
 
 
 int main(int ac, char *av[])
@@ -401,11 +481,14 @@ int main(int ac, char *av[])
     n = NULL;
     if(ac == 1)
         error(NULL,NULL);
-    stack_check(av+1, &head, n);
-    init_arr(n,head);
+    stack_check(av+1, &head);
     if(check_sorted(head) == 0)
+    {
+        init_arr(head,n);
         sort_stack(&head);
-    for (t_list *i = head; i; i = i->next)
-        printf("%d\n", i->number);
+    }
+    // for (t_list *i = head; i; i = i->next)
+    //     printf("%d : %d  :%d \n", i->number, i->level, i->indice,);
     free_stack(&head);
+    free(n);
 }
